@@ -5,8 +5,8 @@ Plugin that displays Claude Code session usage in the macOS menu bar.
 ## Requirements
 
 - [SwiftBar](https://github.com/swiftbar/SwiftBar)
-- [tmux](https://github.com/tmux/tmux) (`brew install tmux`)
-- [Claude Code CLI](https://claude.ai/claude-code)
+- [tmux](https://github.com/tmux/tmux)
+- [Claude Code CLI](https://www.claude.com/product/claude-code)
 
 ## Installation
 

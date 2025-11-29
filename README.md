@@ -2,6 +2,8 @@
 
 Plugin that displays Claude Code session usage in the macOS menu bar.
 
+![Screenshot](assets/screenshot.jpeg)
+
 ## Requirements
 
 - [SwiftBar](https://github.com/swiftbar/SwiftBar)

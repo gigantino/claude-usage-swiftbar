@@ -12,12 +12,7 @@ Plugin that displays Claude Code session usage in the macOS menu bar.
 
 ## Installation
 
-1. Copy the plugin to your SwiftBar plugins folder
+1. Copy `claude-usage.30s.sh` to your SwiftBar plugins folder
 
-2. Make it executable:
-   ```bash
-   chmod +x claude-usage.1m.sh
-   ```
-
-3. Refresh SwiftBar or restart it.
+2. Refresh SwiftBar or restart it.
 

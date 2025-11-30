@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # <xbar.title>Claude Usage</xbar.title>
-# <xbar.version>v2.0</xbar.version>
+# <xbar.version>v2.1</xbar.version>
 # <xbar.author>man</xbar.author>
 # <xbar.desc>Displays Claude Code session usage in menu bar</xbar.desc>
 # <xbar.dependencies>bash,tmux</xbar.dependencies>
@@ -57,48 +57,77 @@ fi
 
 # Background fetch function
 fetch_usage() {
-    # Don't run if already fetching (but clear stale locks older than 60s)
+    SESSION="swiftbar-claude-$$"
+
+    # Cleanup function - always remove lock and kill session
+    cleanup() {
+        rm -f "$LOCK_FILE"
+        tmux kill-session -t "$SESSION" 2>/dev/null
+    }
+
+    # Check lock - use PID-based check (if process is dead, lock is stale)
     if [ -f "$LOCK_FILE" ]; then
-        LOCK_AGE=$(($(date +%s) - $(stat -f %m "$LOCK_FILE" 2>/dev/null || echo 0)))
-        [ $LOCK_AGE -lt 60 ] && exit 0
+        LOCK_PID=$(cat "$LOCK_FILE" 2>/dev/null)
+        if [ -n "$LOCK_PID" ] && kill -0 "$LOCK_PID" 2>/dev/null; then
+            exit 0
+        fi
         rm -f "$LOCK_FILE"
     fi
-    touch "$LOCK_FILE"
-    trap 'rm -f "$LOCK_FILE"' EXIT
+
+    # Create lock with our PID
+    echo $$ > "$LOCK_FILE"
+    trap cleanup EXIT
 
     # Kill any orphaned sessions from previous runs
     tmux list-sessions 2>/dev/null | grep "swiftbar-claude" | cut -d: -f1 | xargs -I{} tmux kill-session -t {} 2>/dev/null
 
-    export NVM_DIR="$HOME/.nvm"
-    [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+    # Build PATH with common locations (without sourcing nvm.sh which is slow)
     export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
 
-    CLAUDE_BIN=$(which claude 2>/dev/null)
-    [ -z "$CLAUDE_BIN" ] && rm -f "$LOCK_FILE" && exit 1
+    # Add NVM paths if they exist (find any installed node version)
+    if [ -d "$HOME/.nvm/versions/node" ]; then
+        NVM_NODE=$(ls -t "$HOME/.nvm/versions/node" 2>/dev/null | head -1)
+        [ -n "$NVM_NODE" ] && export PATH="$HOME/.nvm/versions/node/$NVM_NODE/bin:$PATH"
+    fi
 
-    LOG_FILE="/tmp/claude_usage_$$.txt"
-    SESSION="swiftbar-claude-$$"
+    # Find claude
+    CLAUDE_BIN=$(which claude 2>/dev/null)
+    [ -z "$CLAUDE_BIN" ] && exit 1
 
     tmux kill-session -t "$SESSION" 2>/dev/null
-    tmux new-session -d -s "$SESSION" "script -q $LOG_FILE $CLAUDE_BIN"
+    tmux new-session -d -s "$SESSION" "$CLAUDE_BIN" || exit 1
 
-    sleep 8
+    # Wait for claude to start
+    sleep 4
+
+    # Check if trust prompt is showing
+    PANE_CHECK=$(tmux capture-pane -t "$SESSION" -p 2>/dev/null)
+    if echo "$PANE_CHECK" | grep -q "Yes, I trust this folder"; then
+        tmux send-keys -t "$SESSION" "1"
+        sleep 0.3
+        tmux send-keys -t "$SESSION" C-m
+        sleep 4
+    fi
+
+    # Send /usage command
     tmux send-keys -t "$SESSION" "/usage"
     sleep 0.3
     tmux send-keys -t "$SESSION" C-m
-    sleep 5
+    sleep 4
+
+    # Capture pane output
+    CLEAN=$(tmux capture-pane -t "$SESSION" -p 2>/dev/null)
+
     tmux send-keys -t "$SESSION" Escape
     sleep 0.3
     tmux send-keys -t "$SESSION" "/exit"
     sleep 0.3
     tmux send-keys -t "$SESSION" C-m
-    sleep 2
+    sleep 1
     tmux kill-session -t "$SESSION" 2>/dev/null
 
-    CLEAN=$(cat "$LOG_FILE" 2>/dev/null | sed 's/\x1b\[[0-9;]*m//g')
     NEW_USAGE=$(echo "$CLEAN" | grep -A1 "Current session" | grep "% used" | grep -oE '[0-9]+%' | head -1)
     RESET_TIME=$(echo "$CLEAN" | grep -A2 "Current session" | grep "Resets" | sed 's/Resets //' | head -1)
-    rm -f "$LOG_FILE"
 
     # Parse reset time to minutes since midnight
     NEW_RESET_MINS=""
@@ -119,7 +148,6 @@ fetch_usage() {
 
     # Save cache
     echo -e "USAGE=\"${NEW_USAGE:-?%}\"\nRESET_MINS=\"$NEW_RESET_MINS\"\nCACHE_TIME=$(date +%s)" > "$CACHE_FILE"
-    rm -f "$LOCK_FILE"
 }
 
 # Check if fetch needed (cache older than 25s)

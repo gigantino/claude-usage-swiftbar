@@ -1,0 +1,41 @@
+[1m[32m                     [32m..'
+                 ,xNMM.
+               .OMMMMo
+               lMM"
+     .;loddo:.  .olloddol;.
+   cKMMMMMMMMMMNWMMMMMMMMMM0:
+ [33m.KMMMMMMMMMMMMMMMMMMMMMMMWd.
+ XMMMMMMMMMMMMMMMMMMMMMMMX.
+[31m;MMMMMMMMMMMMMMMMMMMMMMMM:
+:MMMMMMMMMMMMMMMMMMMMMMMM:
+.MMMMMMMMMMMMMMMMMMMMMMMMX.
+ kMMMMMMMMMMMMMMMMMMMMMMMMWd.
+ [35m'XMMMMMMMMMMMMMMMMMMMMMMMMMMk
+  'XMMMMMMMMMMMMMMMMMMMMMMMMK.
+    [34mkMMMMMMMMMMMMMMMMMMMMMMd
+     ;KMMMMMMMWXXWMMMMMMMk.
+       "cooc*"    "*coo'"[m[1G[16A[m[?7l[34C[m[1m[32mmacair[m@[1m[32mMac[m
+[34C----------
+[34C[m[1m[33mOS[m: [mmacOS Tahoe 26.1 arm64
+[34C[m[1m[33mHost[m: [mMacBook Air (13-inch, M4, 2025)
+[34C[m[1m[33mUptime[m: [m11 hours, 13 mins
+[34C[m[1m[33mPackages[m: [m138 (brew), 7 (brew-cask)
+[34C[m[1m[33mShell[m: [mzsh 5.9
+[34C[m[1m[33mDisplay (HP 22x)[m: [m1920x1080 in 22", 120 Hz [External]
+[34C[m[1m[33mDisplay (Color LCD)[m: [m3420x2224 @ 2x in 14", 60 Hz [Built-in]
+[34C[m[1m[33mDisplay (C34H89x)[m: [m3440x1440 in 34", 100 Hz [External] *
+[34C[m[1m[33mTerminal[m: [mtmux 3.6
+[34C[m[1m[33mCPU[m: [mApple M4 (10) @ 4.46 GHz
+[34C[m[1m[33mGPU[m: [mApple M4 (10) @ 1.47 GHz [Integrated]
+[34C[m[1m[33mMemory[m: [m22.52 GiB / 32.00 GiB ([93m70%[m)
+[34C[m[1m[33mSwap[m: [mDisabled
+[34C[m[1m[33mDisk (/)[m: [m190.05 GiB / 460.43 GiB ([32m41%[m) - apfs [Read-only]
+[34C[m[1m[33mLocal IP (en0)[m: [m192.168.50.254/24
+[34C[m[1m[33mBattery (bq40z651)[m: [m[32m100%[m [AC connected]
+[34C[m[1m[33mPower Adapter[m: [m45W
+[34C
+[?7h[1m[7m%[27m[1m[0m                                                                                k../claude-usage\]7;file://Mac.local/Users/macair/Projects/claude-usage\[0m[27m[24m[J[34mmacair@Mac[39m [37m~/Projects/claude-usage[39m -> [K[?1h=[?2004h1[32m1[39m[?1l>[?2004l
+k1\__zoxide_cd:cd:2: no such entry in dir stack
+[1m[7m%[27m[1m[0m                                                                                k../claude-usage\]7;file://Mac.local/Users/macair/Projects/claude-usage\[0m[27m[24m[J[34mmacair@Mac[39m [37m~/Projects/claude-usage[39m -> [K[?1h=[?2004h//usage[1m[31m/[1m[31mu[1m[31ms[1m[31ma[1m[31mg[1m[31me[0m[39m[?1l>[?2004l
+k/usage\zsh: no such file or directory: /usage
+[1m[7m%[27m[1m[0m                                                                                k../claude-usage\]7;file://Mac.local/Users/macair/Projects/claude-usage\[0m[27m[24m[J[34mmacair@Mac[39m [37m~/Projects/claude-usage[39m -> [K[?1h=[?2004h

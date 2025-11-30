@@ -19,9 +19,29 @@ SHOW_ICON=true
 
 # Load cache
 USAGE="?%"
-TIME_LEFT=""
+RESET_MINS=""
 CACHE_TIME=0
 [ -f "$CACHE_FILE" ] && source "$CACHE_FILE"
+
+# Calculate time remaining dynamically
+TIME_LEFT=""
+if [ -n "$RESET_MINS" ]; then
+    NOW_MINS=$((10#$(date +%H) * 60 + 10#$(date +%M)))
+    if [ $RESET_MINS -gt $NOW_MINS ]; then
+        DIFF=$((RESET_MINS - NOW_MINS))
+    else
+        DIFF=$((1440 - NOW_MINS + RESET_MINS))
+    fi
+    HOURS=$((DIFF / 60))
+    MINS=$((DIFF % 60))
+    if [ $HOURS -gt 0 ] && [ $MINS -gt 0 ]; then
+        TIME_LEFT="${HOURS}h ${MINS}m left"
+    elif [ $HOURS -gt 0 ]; then
+        TIME_LEFT="${HOURS}h left"
+    else
+        TIME_LEFT="${MINS}m left"
+    fi
+fi
 
 # Handle toggle commands
 if [ "$1" = "toggle-time" ]; then
@@ -37,9 +57,17 @@ fi
 
 # Background fetch function
 fetch_usage() {
-    # Don't run if already fetching
-    [ -f "$LOCK_FILE" ] && exit 0
+    # Don't run if already fetching (but clear stale locks older than 60s)
+    if [ -f "$LOCK_FILE" ]; then
+        LOCK_AGE=$(($(date +%s) - $(stat -f %m "$LOCK_FILE" 2>/dev/null || echo 0)))
+        [ $LOCK_AGE -lt 60 ] && exit 0
+        rm -f "$LOCK_FILE"
+    fi
     touch "$LOCK_FILE"
+    trap 'rm -f "$LOCK_FILE"' EXIT
+
+    # Kill any orphaned sessions from previous runs
+    tmux list-sessions 2>/dev/null | grep "swiftbar-claude" | cut -d: -f1 | xargs -I{} tmux kill-session -t {} 2>/dev/null
 
     export NVM_DIR="$HOME/.nvm"
     [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
@@ -72,8 +100,8 @@ fetch_usage() {
     RESET_TIME=$(echo "$CLEAN" | grep -A2 "Current session" | grep "Resets" | sed 's/Resets //' | head -1)
     rm -f "$LOG_FILE"
 
-    # Calculate time remaining
-    NEW_TIME_LEFT=""
+    # Parse reset time to minutes since midnight
+    NEW_RESET_MINS=""
     if [ -n "$RESET_TIME" ]; then
         TIME_PART=$(echo "$RESET_TIME" | grep -oE '[0-9]+:[0-9]+[ap]m|[0-9]+[ap]m' | head -1)
         RESET_HOUR=$(echo "$TIME_PART" | grep -oE '^[0-9]+')
@@ -86,29 +114,11 @@ fetch_usage() {
             [ "$RESET_HOUR" -eq 12 ] && RESET_HOUR=0
         fi
 
-        NOW_MINS=$((10#$(date +%H) * 60 + 10#$(date +%M)))
-        RESET_MINS=$((10#$RESET_HOUR * 60 + 10#$RESET_MIN))
-
-        if [ $RESET_MINS -gt $NOW_MINS ]; then
-            DIFF=$((RESET_MINS - NOW_MINS))
-        else
-            DIFF=$((1440 - NOW_MINS + RESET_MINS))
-        fi
-
-        HOURS=$((DIFF / 60))
-        MINS=$((DIFF % 60))
-
-        if [ $HOURS -gt 0 ] && [ $MINS -gt 0 ]; then
-            NEW_TIME_LEFT="${HOURS}h ${MINS}m left"
-        elif [ $HOURS -gt 0 ]; then
-            NEW_TIME_LEFT="${HOURS}h left"
-        else
-            NEW_TIME_LEFT="${MINS}m left"
-        fi
+        NEW_RESET_MINS=$((10#$RESET_HOUR * 60 + 10#$RESET_MIN))
     fi
 
     # Save cache
-    echo -e "USAGE=\"${NEW_USAGE:-?%}\"\nTIME_LEFT=\"$NEW_TIME_LEFT\"\nCACHE_TIME=$(date +%s)" > "$CACHE_FILE"
+    echo -e "USAGE=\"${NEW_USAGE:-?%}\"\nRESET_MINS=\"$NEW_RESET_MINS\"\nCACHE_TIME=$(date +%s)" > "$CACHE_FILE"
     rm -f "$LOCK_FILE"
 }
 

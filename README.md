@@ -5,6 +5,8 @@ weekly (7d), per-model, and extra-credit limits, with live reset countdowns.
 
 Native Swift, no Dock icon, no external dependencies.
 
+![Screenshot](assets/screenshot.jpeg)
+
 ## How it gets the data
 
 There is no official usage API, so this app combines the two best sources and
